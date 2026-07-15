@@ -84,21 +84,4 @@ Acesse `http://localhost:8080/h2-console` com:
 - Usuário: `sa`
 - Senha: (em branco)
 
-## Decisões de design
 
-- **DTO reaproveitado nos dois sentidos** (`ViaCepResponse`): mapeia o JSON vindo da
-  ViaCEP e também é usado como corpo de resposta do endpoint, via
-  `ViaCepResponse.fromEntity(...)` — evita expor a entidade JPA diretamente na API.
-- **`RestClient`** (sucessor moderno do `RestTemplate` no Spring 6+/Boot 3) para chamar
-  a API externa, encapsulado em `ViaCepClient`.
-- **Upsert por CEP**: `EnderecoService` busca por `findByCep` antes de salvar; se já
-  existir, atualiza os campos (`EnderecoMapper.atualizarEntity`) em vez de duplicar o
-  registro.
-- **Validação e normalização do CEP** antes de chamar a API externa: remove máscara
-  (`-`, `.`, espaços) e exige exatamente 8 dígitos, evitando chamadas desnecessárias
-  para valores obviamente inválidos.
-- **Tratamento de erros centralizado** via `@RestControllerAdvice`, com respostas JSON
-  padronizadas (`404` para CEP inválido/inexistente, `502` para falha na API externa).
-- **Camadas separadas**: `Controller` (HTTP) → `Service` (regra de negócio) →
-  `Client` (integração externa) / `Repository` (persistência) — cada peça com uma única
-  responsabilidade.
